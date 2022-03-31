@@ -4,6 +4,7 @@ import MineBlock from './components/MineBlock.vue'
 import { GamePlay } from './logic'
 import { isDev, toggleDev } from '~/storage'
 const play = new GamePlay(5, 5, 1)
+
 useStorage('vueswepper-state', play.state)
 const state = computed(() => play.board)
 watchEffect(() => {
