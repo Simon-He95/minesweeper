@@ -16,12 +16,20 @@ export class GamePlay {
   WIDTH = 10
   HEIGHT = 10
   state = ref<GameState>()
-  constructor(public width: number, public height: number) {
+  constructor(
+    public width: number,
+    public height: number,
+    public mines: number,
+  ) {
     this.reset()
   }
 
   get board() {
     return this.state.value?.board
+  }
+
+  get blocks() {
+    return this.state.value?.board?.flat()
   }
 
   reset() {
@@ -36,14 +44,27 @@ export class GamePlay {
     }
   }
 
+  random(min: number, max: number) {
+    return Math.random() * (max - min) + min
+  }
+
+  randomInt(min: number, max: number) {
+    return Math.round(this.random(min, max))
+  }
+
   generateMines(state: BlockState[][], initial: BlockState) {
-    for (const row of state) {
-      for (const block of row) {
-        if (Math.abs(initial.x - block.x) <= 1 || Math.abs(initial.y - block.y) <= 1)
-          continue
-        block.mine = Math.random() < 0.3
-      }
+    const placeRandom = () => {
+      const x = this.randomInt(0, this.width - 1)
+      const y = this.randomInt(0, this.height - 1)
+      const block = state[y][x]
+      if (Math.abs(initial.x - x) <= 1 || Math.abs(initial.y - y) <= 1 || block.mine) return
+      block.mine = true
+      return true
     }
+    Array.from({ length: this.mines }, () => null).forEach(() => {
+      // eslint-disable-next-line no-empty
+      while (!placeRandom()) { }
+    })
     this.updateNumber()
   }
 
@@ -80,7 +101,7 @@ export class GamePlay {
   onClick(block: BlockState) {
     if (this.state.value?.gameState !== 'play') return
     if (!this.state.value.mineGenerated) {
-      this.generateMines(this.board, block)
+      this.generateMines(this.board!, block)
       this.state.value.mineGenerated = true
     }
     block.revealed = true
@@ -120,7 +141,13 @@ export class GamePlay {
         this.state.value.gameState = 'lost'
         this.showAllMines()
       }
-      else { this.state.value.gameState = 'won' }
+      else {
+        this.state.value.gameState = 'won'
+      }
     }
+  }
+
+  get gameState() {
+    return this.state.value?.gameState
   }
 }

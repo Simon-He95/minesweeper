@@ -3,18 +3,21 @@
 import MineBlock from './components/MineBlock.vue'
 import { GamePlay } from './logic'
 import { isDev, toggleDev } from '~/storage'
-const play = new GamePlay(10, 10)
+const play = new GamePlay(5, 5, 1)
 useStorage('vueswepper-state', play.state)
 const state = computed(() => play.board)
+watchEffect(() => {
+  play.checkGameState()
+})
 </script>
 <template>
-  <main font-sans p="x-4 y-10" text="center gray-700 dark:gray-200">
+  <main font-sans p="y-10" text="center gray-700 dark:gray-200">
     <div>
       Minesw
       <div>
         Minesweeper
-        <div p5>
-          <div v-for="row, y in state" :key="y" flex="~" items-center justify-center>
+        <div p5 w-full overflow-auto>
+          <div v-for="row, y in state" :key="y" flex="~" items-center justify-center w-max ma>
             <MineBlock
               v-for="block, x in row"
               :key="x"
@@ -30,6 +33,8 @@ const state = computed(() => play.board)
         </div>
       </div>
     </div>
+    <div>Counts: {{ play.blocks?.reduce((a, b) => a + (b.mine ? 1 : 0), 0) }}</div>
+    <Confetti :passed="play.gameState === 'won'" />
     <Footer />
   </main>
 </template>

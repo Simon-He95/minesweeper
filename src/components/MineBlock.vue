@@ -2,7 +2,7 @@
 import type { BlockState } from '~/types'
 import { isDev } from '~/storage'
 
-defineProps<{ block?: BlockState }>()
+defineProps<{ block: BlockState }>()
 
 const numberColors = [
   'text-transparent',
@@ -32,8 +32,8 @@ function getBlockClass(block: BlockState) {
     flex="~"
     items-center
     justify-center
-    w-10
-    h-10
+    min-w-10
+    min-h-10
     m="0.5"
     border="1 gray-400/10"
     :class="getBlockClass(block)"
@@ -43,7 +43,7 @@ function getBlockClass(block: BlockState) {
     </template>
     <template v-else-if="block.revealed || isDev">
       <div v-if="block.mine" i-mdi-mine />
-      <div v-else>{{ block.adjacentMines }}</div>
+      <div v-else font-600>{{ block.adjacentMines }}</div>
     </template>
   </button>
 </template>
