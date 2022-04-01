@@ -19,7 +19,7 @@ const minesCount = $computed(() => play.blocks?.reduce((a, b) => {
 function newGame(difficulty: 'easy' | 'medium' | 'hard') {
   switch (difficulty) {
     case 'easy':
-      play.reset(9, 9, 1)
+      play.reset(9, 9, 10)
       break
     case 'medium':
       play.reset(16, 16, 40)

@@ -173,8 +173,10 @@ export class GamePlay {
   onGameOver(status: GameStatus) {
     this.state.value!.gameState = status
     this.state.value!.endMS = +Date.now()
-    if (status === 'lost')
+    if (status === 'lost') {
       this.showAllMines()
+      setTimeout(() => alert('lost'))
+    }
   }
 
   get gameState() {
