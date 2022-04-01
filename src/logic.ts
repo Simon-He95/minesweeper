@@ -1,5 +1,4 @@
-import type { BlockState, GameState } from './types'
-import { isDev } from './storage'
+import type { BlockState, GameState, GameStatus } from './types'
 
 const directions = [
   [1, 1],
@@ -115,11 +114,9 @@ export class GamePlay {
     }
     block.revealed = true
 
-    if (block.mine) {
-      this.state.value.gameState = 'lost'
-      this.showAllMines()
-      // isDev.value = true
-    }
+    if (block.mine)
+      this.onGameOver('lost')
+
     this.expandZero(block)
     this.checkGameState()
   }
@@ -145,15 +142,39 @@ export class GamePlay {
     if (!this.state.value?.mineGenerated)
       return
     const blocks = this.board?.flat()
-    if (blocks?.every(b => b.flagged || b.revealed)) {
-      if (blocks.some(b => b.flagged && !b.mine)) {
-        this.state.value.gameState = 'lost'
-        this.showAllMines()
-      }
-      else {
-        this.state.value.gameState = 'won'
-      }
+    if (blocks?.every(b => b.flagged || b.revealed || b.mine)) {
+      if (blocks.some(b => b.flagged && !b.mine))
+        this.onGameOver('lost')
+      else
+        this.onGameOver('won')
     }
+  }
+
+  autoExpand(block: BlockState) {
+    const siblings = this.getSiblings(block)
+    const flags = siblings.reduce((a, b) => a + (b.flagged ? 1 : 0), 0)
+    const notRevealed = siblings.reduce((a, b) => a + (!b.revealed && !b.flagged ? 1 : 0), 0)
+    if (flags === block.adjacentMines) {
+      siblings.forEach((i) => {
+        i.revealed = true
+        if (i.mine)
+          this.onGameOver('lost')
+      })
+    }
+    const missingFlags = block.adjacentMines - flags
+    if (notRevealed === missingFlags) {
+      siblings.forEach((i) => {
+        if (!i.revealed && !i.flagged)
+          i.flagged = true
+      })
+    }
+  }
+
+  onGameOver(status: GameStatus) {
+    this.state.value!.gameState = status
+    this.state.value!.endMS = +Date.now()
+    if (status === 'lost')
+      this.showAllMines()
   }
 
   get gameState() {
@@ -161,6 +182,6 @@ export class GamePlay {
   }
 
   get stateMS() {
-    return this.state.value?.startMS || Date.now()
+    return this.state.value?.startMS || +Date.now()
   }
 }

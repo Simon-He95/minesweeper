@@ -6,7 +6,7 @@ import { isDev, toggleDev } from '~/storage'
 const play = new GamePlay(9, 9, 10)
 
 const now = $(useNow())
-const countDown = $computed(() => Math.round((+now - +play.stateMS) / 1000))
+const countDown = $computed(() => Math.round(((play.state.value?.endMS || +now) - play.stateMS) / 1000))
 useStorage('vueswepper-state', play.state)
 const state = computed(() => play.board)
 
@@ -19,7 +19,7 @@ const minesCount = $computed(() => play.blocks?.reduce((a, b) => {
 function newGame(difficulty: 'easy' | 'medium' | 'hard') {
   switch (difficulty) {
     case 'easy':
-      play.reset(9, 9, 10)
+      play.reset(9, 9, 1)
       break
     case 'medium':
       play.reset(16, 16, 40)
@@ -60,7 +60,8 @@ watchEffect(() => {
             v-for="block, x in row"
             :key="x"
             :block="block"
-            @click="play.onClick(block)"
+            @click.prevent="play.onClick(block)"
+            @dblclick.prevent="play.autoExpand(block)"
             @contextmenu.prevent="play.onRightClick(block)"
           />
         </div>
