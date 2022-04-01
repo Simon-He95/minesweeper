@@ -100,6 +100,7 @@ export class GamePlay {
   }
 
   onRightClick(block: BlockState) {
+    debugger
     if (this.state.value?.gameState !== 'play') return
     if (block.revealed) return
     block.flagged = !block.flagged
